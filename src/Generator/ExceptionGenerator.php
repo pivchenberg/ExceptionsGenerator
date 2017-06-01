@@ -21,9 +21,13 @@ class ExceptionGenerator
      */
     private $destinationPath;
 
-    public function __construct($namespace, $destinationPath)
+    public function __construct($namespace, $destinationPath, $basicInterFaceName = null)
     {
-        $this->builder = new ExceptionGenItemBuilder($namespace);
+        if (!empty($basicInterFaceName))
+            $this->builder = new ExceptionGenItemBuilder($namespace, $basicInterFaceName);
+        else
+            $this->builder = new ExceptionGenItemBuilder($namespace);
+
         $this->fs = new Filesystem();
         $this->destinationPath = $destinationPath; //TODO: dir exists, document root
     }

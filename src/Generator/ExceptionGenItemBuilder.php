@@ -12,7 +12,10 @@ use Pivchenberg\ExceptionsGenerator\Generator\ExceptionGenItemType\ExceptionGenI
 
 class ExceptionGenItemBuilder
 {
-    const BASIC_INTERFACE_NAME = "ExceptionInterface";
+    /**
+     * @var string
+     */
+    protected $basicInterfaceName;
 
     /**
      * @var array
@@ -27,10 +30,12 @@ class ExceptionGenItemBuilder
     /**
      * ExceptionGenItemBuilder constructor.
      * @param $namespace
+     * @param $basicInterfaceName
      */
-    public function __construct($namespace)
+    public function __construct($namespace, $basicInterfaceName = 'ExceptionInterface')
     {
         $this->namespace = $namespace;
+        $this->basicInterfaceName = $basicInterfaceName;
         $this->buildMap();
     }
 
@@ -70,7 +75,7 @@ class ExceptionGenItemBuilder
 
     protected function buildMap()
     {
-        $this->map['ExceptionInterface'] = [
+        $this->map[$this->basicInterfaceName] = [
             'type' => ExceptionGenItemInterfaceType::class,
         ];
 
@@ -80,7 +85,7 @@ class ExceptionGenItemBuilder
                 $this->map[$class] = [
                     'type' => ExceptionGenItemClassType::class,
                     'extends' => [$class],
-                    'implements' => ['ExceptionInterface'],
+                    'implements' => [$this->basicInterfaceName],
                 ];
             }
         }
