@@ -1,0 +1,15 @@
+{
+  "name": "pivchenberg/exceptions-generator",
+  "description": "Generate exceptions files for all throwables in php 7",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+	{
+	  "name": "Nikita Pivchenkov",
+	  "email": "pivchenberg@gmail.com"
+	}
+  ],
+  "require": {
+    "symfony/console": "^3.3"
+  }
+}
