@@ -7,6 +7,8 @@
 
 namespace Pivchenberg\ExceptionsGenerator\Generator;
 
+use Symfony\Component\Filesystem\Filesystem;
+
 class ExceptionGenerator
 {
     /**
@@ -14,9 +16,16 @@ class ExceptionGenerator
      */
     private $builder;
 
-    public function __construct(ExceptionGenItemBuilder $builder)
+    /**
+     * @var string
+     */
+    private $destinationPath;
+
+    public function __construct($namespace, $destinationPath)
     {
-        $this->builder = $builder;
+        $this->builder = new ExceptionGenItemBuilder($namespace);
+        $this->fs = new Filesystem();
+        $this->destinationPath = $destinationPath; //TODO: dir exists, document root
     }
 
     public function generateExceptionClass(ExceptionGenItem $exceptionGenItem)

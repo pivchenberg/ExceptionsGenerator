@@ -154,14 +154,4 @@ class ExceptionGenItem
 
         return $this;
     }
-
-    public function isImplements()
-    {
-        return !empty($this->implements);
-    }
-
-    public function isExtends()
-    {
-        return !empty($this->extends);
-    }
 }

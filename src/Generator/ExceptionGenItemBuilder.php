@@ -7,12 +7,13 @@
 
 namespace Pivchenberg\ExceptionsGenerator\Generator;
 
-
 use Pivchenberg\ExceptionsGenerator\Generator\ExceptionGenItemType\ExceptionGenItemClassType;
 use Pivchenberg\ExceptionsGenerator\Generator\ExceptionGenItemType\ExceptionGenItemInterfaceType;
 
 class ExceptionGenItemBuilder
 {
+    const BASIC_INTERFACE_NAME = "ExceptionInterface";
+
     /**
      * @var array
      */
