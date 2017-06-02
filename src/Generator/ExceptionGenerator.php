@@ -55,19 +55,17 @@ EOD;
     public function __construct($namespace, $documentRoot, $destinationPathFromRoot, $basicInterFaceName = null)
     {
         // TODO: maybe remember $namespace and $destinationPathFromRoot?
-        // TODO: create method normalizeNamespace
-        $arNamespace = self::pathToArray($namespace);
-        $namespace = self::arrayToNamespace($arNamespace);
+        self::normalizeNamespace($namespace);
 
         $this->builder = new ExceptionGenItemBuilder($namespace, $basicInterFaceName);
         $this->fs = new Filesystem();
-        $this->documentRoot = $documentRoot;
+        self::normalizePath($documentRoot);
+        $this->documentRoot =  DIRECTORY_SEPARATOR . $documentRoot;
 
-        // TODO: create method normalizeDocumentRoot
         $explodedDocumentRoot = self::pathToArray($this->documentRoot);
         $explodedDestinationPath = self::pathToArray($destinationPathFromRoot);
         $destinationPath = self::arrayToPath(array_merge($explodedDocumentRoot, $explodedDestinationPath));
-        $this->destinationPath = $destinationPath;
+        $this->destinationPath = DIRECTORY_SEPARATOR . $destinationPath;
     }
 
     /**
@@ -220,12 +218,14 @@ EOD;
     }
 
     /**
+     * TODO: this method removes first / from path, works for Windows but not for Linux
+     *
      * @param $path
      * @return array|ø
      */
     static protected function pathToArray($path)
     {
-        return preg_split('/[\/\\\\]+/', $path, -1, PREG_SPLIT_NO_EMPTY);
+        $explodedPath = preg_split('/[\/\\\\]+/', $path, -1, PREG_SPLIT_NO_EMPTY);
     }
 
     /**
@@ -252,5 +252,23 @@ EOD;
     public function getMap()
     {
         return $this->builder->getMap();
+    }
+
+    /**
+     * @param string $namespace
+     */
+    static function normalizeNamespace(&$namespace)
+    {
+        $arNamespace = self::pathToArray($namespace);
+        $namespace = self::arrayToNamespace($arNamespace);
+    }
+
+    /**
+     * @param string $path
+     */
+    static function normalizePath(&$path)
+    {
+        $arNamespace = self::pathToArray($path);
+        $path = self::arrayToPath($arNamespace);
     }
 }
