@@ -152,10 +152,17 @@ EOD;
 
         $pattern = str_replace('#EXTENDS_IMPLEMENTS#', $strExtends . $strImplements, $pattern);
 
-        $filePath = $this->destinationPath . DIRECTORY_SEPARATOR . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
+        $filePath = $this->destinationPath
+            . DIRECTORY_SEPARATOR . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
 
-        if(!file_exists($filePath))
+        if(!file_exists($filePath)) {
             $this->fs->dumpFile($filePath, $pattern);
+        } else {
+            $newFile = $this->destinationPath
+                . DIRECTORY_SEPARATOR . '~' . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
+            $this->fs->copy($filePath, $newFile);
+            $this->fs->dumpFile($filePath, $pattern);
+        }
 
         return $filePath;
     }
