@@ -10,6 +10,9 @@ namespace Pivchenberg\ExceptionsGenerator\Generator\ExceptionGenItemType;
 
 class ExceptionGenItemClassType implements ExceptionGenItemType
 {
+    /**
+     * @return string
+     */
     public function getGenType(): string
     {
         return 'class';

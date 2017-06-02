@@ -112,6 +112,9 @@ EOD;
         return $this->isBasicInterfaceExists;
     }
 
+    /**
+     * @return array
+     */
     public function generateBasicInterface()
     {
         $basicInterface = $this->builder->buildBasicInterface();
@@ -249,6 +252,9 @@ EOD;
         return implode('\\', $explodedPath);
     }
 
+    /**
+     * @return array
+     */
     public function getMap()
     {
         return $this->builder->getMap();

@@ -67,7 +67,7 @@ class ExceptionGenItemBuilder
     /**
      * @param $exceptionType
      * @return ExceptionGenItem
-     * @throws \Exception
+     * @throws OutOfBoundsException
      */
     public function build($exceptionType)
     {
@@ -97,6 +97,9 @@ class ExceptionGenItemBuilder
         return $exceptionGetItem;
     }
 
+    /**
+     * @return void
+     */
     protected function buildMap()
     {
         foreach (get_declared_classes() as $class) {
@@ -116,6 +119,8 @@ class ExceptionGenItemBuilder
 
     /**
      * Actually from this exceptions we can't extends
+     *
+     * @return void
      */
     protected function excludeFromMap()
     {
@@ -131,6 +136,9 @@ class ExceptionGenItemBuilder
         }
     }
 
+    /**
+     * @return void
+     */
     protected function sortMapByPriority()
     {
         $map = $this->map;
