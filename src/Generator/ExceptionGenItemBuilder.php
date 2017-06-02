@@ -7,6 +7,7 @@
 
 namespace Pivchenberg\ExceptionsGenerator\Generator;
 
+use Pivchenberg\ExceptionsGenerator\Exception\OutOfBoundsException;
 use Pivchenberg\ExceptionsGenerator\Generator\ExceptionGenItemType\ExceptionGenItemClassType;
 use Pivchenberg\ExceptionsGenerator\Generator\ExceptionGenItemType\ExceptionGenItemInterfaceType;
 
@@ -70,9 +71,8 @@ class ExceptionGenItemBuilder
      */
     public function build($exceptionType)
     {
-        if (!isset($this->map[$exceptionType])) {
-            throw new \Exception('There is no such type of exception'); //TODO: wrong exception type
-        }
+        if (!isset($this->map[$exceptionType]))
+            throw new OutOfBoundsException('There is no such type of exception');
 
         $exceptionMap = $this->map[$exceptionType];
         $exceptionGetItem = new ExceptionGenItem();

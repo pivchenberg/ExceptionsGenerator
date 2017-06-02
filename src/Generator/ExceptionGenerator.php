@@ -7,6 +7,8 @@
 
 namespace Pivchenberg\ExceptionsGenerator\Generator;
 
+use Pivchenberg\ExceptionsGenerator\Exception\LogicException;
+use Pivchenberg\ExceptionsGenerator\Exception\RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 
 class ExceptionGenerator
@@ -75,13 +77,14 @@ EOD;
 
     /**
      * @param $exceptionClassName
+     * @return string
      * @throws \Exception
      */
     public function generateExceptionClass($exceptionClassName)
     {
         //check target dir
         if (!$this->fs->exists($this->destinationPath))
-            throw new \Exception("target `{$this->destinationPath}` directory does not exists");
+            throw new RuntimeException("target `{$this->destinationPath}` directory does not exists");
 
         // check basic interface
         if (!$this->isBasicInterfaceExists()) {
@@ -89,7 +92,7 @@ EOD;
         }
 
         $exceptionGenItem = $this->builder->build($exceptionClassName);
-        $this->generate($exceptionGenItem);
+        return $this->generate($exceptionGenItem);
     }
 
     protected function isBasicInterfaceExists()
@@ -110,9 +113,12 @@ EOD;
         $this->generate($basicInterface);
     }
 
+    /**
+     * @param ExceptionGenItem $exceptionGenItem
+     * @return string
+     */
     protected function generate(ExceptionGenItem $exceptionGenItem)
     {
-        //TODO: validate $exceptionGetItem
         $pattern = self::GENERATE_PATTERN;
         $strNamespace = !empty($exceptionGenItem->getNamespace())
             ? 'namespace ' . $exceptionGenItem->getNamespace() . ';' . PHP_EOL
@@ -147,8 +153,11 @@ EOD;
         $pattern = str_replace('#EXTENDS_IMPLEMENTS#', $strExtends . $strImplements, $pattern);
 
         $filePath = $this->destinationPath . DIRECTORY_SEPARATOR . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
-        // TODO: do not rewrite already exist files
-        $this->fs->dumpFile($filePath, $pattern);
+
+        if(!file_exists($filePath))
+            $this->fs->dumpFile($filePath, $pattern);
+
+        return $filePath;
     }
 
     /**
