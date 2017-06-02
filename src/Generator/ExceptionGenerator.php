@@ -8,7 +8,6 @@
 namespace Pivchenberg\ExceptionsGenerator\Generator;
 
 use Pivchenberg\ExceptionsGenerator\Exception\ErrorException;
-use Pivchenberg\ExceptionsGenerator\Exception\LogicException;
 use Pivchenberg\ExceptionsGenerator\Exception\RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -67,6 +66,7 @@ EOD;
             $this->builder = new ExceptionGenItemBuilder($namespace, $basicInterFaceName);
         else
             $this->builder = new ExceptionGenItemBuilder($namespace);
+
         $this->fs = new Filesystem();
         $this->documentRoot = self::getDocumentRoot(__DIR__);
 
@@ -100,7 +100,7 @@ EOD;
     /**
      * @return bool
      */
-    protected function isBasicInterfaceExists()
+    public function isBasicInterfaceExists()
     {
         if(!$this->isBasicInterfaceExists) {
             $basicInterfacePath = $this->destinationPath . DIRECTORY_SEPARATOR
@@ -112,7 +112,7 @@ EOD;
         return $this->isBasicInterfaceExists;
     }
 
-    protected function generateBasicInterface()
+    public function generateBasicInterface()
     {
         $basicInterface = $this->builder->buildBasicInterface();
         return $this->generate($basicInterface);
@@ -160,19 +160,18 @@ EOD;
         $filePath = $this->destinationPath
             . DIRECTORY_SEPARATOR . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
 
-        $fileAlreadyExists = file_exists($filePath);
-        if(!$fileAlreadyExists) {
+        if(!file_exists($filePath)) {
             $this->fs->dumpFile($filePath, $pattern);
         } else {
-            $newFilePath = $this->destinationPath
+            $copiedFilePath = $this->destinationPath
                 . DIRECTORY_SEPARATOR . '~' . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
-            $this->fs->copy($filePath, $newFilePath);
+            $this->fs->copy($filePath, $copiedFilePath);
             $this->fs->dumpFile($filePath, $pattern);
         }
 
         return [
             'filePath' => $filePath,
-            'fileAlreadyExists' => $fileAlreadyExists,
+            'copiedFilePath' => $copiedFilePath ?? '',
         ];
     }
 
