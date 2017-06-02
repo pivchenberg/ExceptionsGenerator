@@ -10,5 +10,5 @@ namespace Pivchenberg\ExceptionsGenerator\Generator\ExceptionGenItemType;
 
 interface ExceptionGenItemType
 {
-
+    public function getGenType() : string;
 }

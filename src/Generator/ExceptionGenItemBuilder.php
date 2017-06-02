@@ -15,7 +15,7 @@ class ExceptionGenItemBuilder
     /**
      * @var string
      */
-    protected $basicInterfaceName;
+    public $basicInterfaceName;
 
     /**
      * @var array
@@ -66,7 +66,7 @@ class ExceptionGenItemBuilder
         // use block
         $use = [];
         foreach ($exceptionGetItem->getImplements() as $useItem) {
-            $use[] = $this->namespace . $useItem;
+            $use[] = $this->namespace . '\\' . $useItem;
         }
         $exceptionGetItem->setUse($use);
 
@@ -75,20 +75,29 @@ class ExceptionGenItemBuilder
 
     protected function buildMap()
     {
-        $this->map[$this->basicInterfaceName] = [
-            'type' => ExceptionGenItemInterfaceType::class,
-        ];
-
         foreach (get_declared_classes() as $class) {
             $reflection = new \ReflectionClass($class);
             if ($reflection->implementsInterface(\Throwable::class)) {
                 $this->map[$class] = [
                     'type' => ExceptionGenItemClassType::class,
-                    'extends' => [$class],
+                    'extends' => [ '\\' . $class],
                     'implements' => [$this->basicInterfaceName],
                 ];
             }
         }
+    }
+
+    /**
+     * @return ExceptionGenItem
+     */
+    public function buildBasicInterface()
+    {
+        $exceptionGenItem = new ExceptionGenItem();
+        $exceptionGenItem->setClassName($this->basicInterfaceName)
+            ->setType(new ExceptionGenItemInterfaceType())
+            ->setNamespace($this->namespace);
+
+        return $exceptionGenItem;
     }
 
     /**

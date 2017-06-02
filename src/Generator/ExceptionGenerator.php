@@ -11,6 +11,21 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class ExceptionGenerator
 {
+    const PHP_EXTENSION = '.php';
+
+    const GENERATE_PATTERN = <<<EOD
+<?php
+
+#NAMESPACE#
+#USE#
+#TYPE# #CLASS_NAME##EXTENDS_IMPLEMENTS#
+{
+
+}
+
+EOD;
+
+
     /**
      * @var ExceptionGenItemBuilder
      */
@@ -27,6 +42,11 @@ class ExceptionGenerator
     private $documentRoot;
 
     /**
+     * @var bool
+     */
+    private $isBasicInterfaceExists = false;
+
+    /**
      * ExceptionGenerator constructor.
      * @param $namespace
      * @param $destinationPathFromRoot
@@ -34,6 +54,9 @@ class ExceptionGenerator
      */
     public function __construct($namespace, $destinationPathFromRoot, $basicInterFaceName = null)
     {
+        $arNamespace = self::pathToArray($namespace);
+        $namespace = self::arrayToNamespace($arNamespace);
+
         if (!empty($basicInterFaceName))
             $this->builder = new ExceptionGenItemBuilder($namespace, $basicInterFaceName);
         else
@@ -49,10 +72,77 @@ class ExceptionGenerator
 
     /**
      * @param $exceptionClassName
+     * @throws \Exception
      */
     public function generateExceptionClass($exceptionClassName)
     {
+        //check target dir
+        if (!$this->fs->exists($this->destinationPath))
+            throw new \Exception("target `{$this->destinationPath}` directory does not exists");
 
+        // check basic interface
+        if (!$this->isBasicInterfaceExists()) {
+            $this->generateBasicInterface();
+        }
+
+        $exceptionGenItem = $this->builder->build($exceptionClassName);
+        $this->generate($exceptionGenItem);
+    }
+
+    protected function isBasicInterfaceExists()
+    {
+        if(!$this->isBasicInterfaceExists) {
+            $basicInterfacePath = $this->destinationPath . DIRECTORY_SEPARATOR
+                . $this->builder->basicInterfaceName . self::PHP_EXTENSION;
+
+            $this->isBasicInterfaceExists = $this->fs->exists($basicInterfacePath);
+        }
+
+        return $this->isBasicInterfaceExists;
+    }
+
+    protected function generateBasicInterface()
+    {
+        $basicInterface = $this->builder->buildBasicInterface();
+        $this->generate($basicInterface);
+    }
+
+    protected function generate(ExceptionGenItem $exceptionGenItem)
+    {
+        //TODO: validate $exceptionGetItem
+        $pattern = self::GENERATE_PATTERN;
+        $strNamespace = !empty($exceptionGenItem->getNamespace())
+            ? 'namespace ' . $exceptionGenItem->getNamespace() . ';' . PHP_EOL
+            : '';
+        $pattern = str_replace('#NAMESPACE#', $strNamespace, $pattern);
+
+        $arUse = $exceptionGenItem->getUse();
+        $strUse = '';
+        foreach ($arUse as $useItem) {
+            $strUse .= 'use ' . $useItem . ';' . PHP_EOL;
+        }
+        if($strUse)
+            $strUse .= PHP_EOL;
+        $pattern = str_replace('#USE#', $strUse, $pattern);
+
+        $pattern = str_replace('#TYPE#', $exceptionGenItem->getType()->getGenType(), $pattern);
+
+        $pattern = str_replace('#CLASS_NAME#', $exceptionGenItem->getClassName(), $pattern);
+
+        $strExtends = '';
+        $arExtends = $exceptionGenItem->getExtends();
+        if (!empty($arExtends))
+            $strExtends = ' extends ' . implode(', ', $arExtends);
+
+        $strImplements = '';
+        $arImplements = $exceptionGenItem->getImplements();
+        if(!empty($arImplements))
+            $strImplements = ' implements ' . implode(', ', $arImplements);
+
+        $pattern = str_replace('#EXTENDS_IMPLEMENTS#', $strExtends . $strImplements, $pattern);
+
+        $filePath = $this->destinationPath . DIRECTORY_SEPARATOR . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
+        $this->fs->dumpFile($filePath, $pattern);
     }
 
     /**
@@ -118,5 +208,19 @@ class ExceptionGenerator
     static protected function arrayToPath(array $explodedPath)
     {
         return implode(DIRECTORY_SEPARATOR, $explodedPath);
+    }
+
+    /**
+     * @param array $explodedPath
+     * @return string
+     */
+    static protected function arrayToNamespace(array $explodedPath)
+    {
+        return implode('\\', $explodedPath);
+    }
+
+    public function getMap()
+    {
+        $this->builder->getMap();
     }
 }
