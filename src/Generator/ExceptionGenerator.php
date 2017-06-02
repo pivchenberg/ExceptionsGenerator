@@ -16,8 +16,10 @@ class ExceptionGenerator
     const GENERATE_PATTERN = <<<EOD
 <?php
 
-#NAMESPACE#
-#USE#
+#NAMESPACE##USE#
+/**
+ * Auto-generated code
+ */
 #TYPE# #CLASS_NAME##EXTENDS_IMPLEMENTS#
 {
 
@@ -54,6 +56,7 @@ EOD;
      */
     public function __construct($namespace, $destinationPathFromRoot, $basicInterFaceName = null)
     {
+        // TODO: maybe remember $namespace and $destinationPathFromRoot?
         $arNamespace = self::pathToArray($namespace);
         $namespace = self::arrayToNamespace($arNamespace);
 
@@ -118,11 +121,13 @@ EOD;
 
         $arUse = $exceptionGenItem->getUse();
         $strUse = '';
-        foreach ($arUse as $useItem) {
-            $strUse .= 'use ' . $useItem . ';' . PHP_EOL;
-        }
-        if($strUse)
+        if (!empty($arUse)) {
             $strUse .= PHP_EOL;
+            foreach ($arUse as $useItem) {
+                $strUse .= 'use ' . $useItem . ';' . PHP_EOL;
+            }
+        }
+
         $pattern = str_replace('#USE#', $strUse, $pattern);
 
         $pattern = str_replace('#TYPE#', $exceptionGenItem->getType()->getGenType(), $pattern);
@@ -142,6 +147,7 @@ EOD;
         $pattern = str_replace('#EXTENDS_IMPLEMENTS#', $strExtends . $strImplements, $pattern);
 
         $filePath = $this->destinationPath . DIRECTORY_SEPARATOR . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
+        // TODO: do not rewrite already exist files
         $this->fs->dumpFile($filePath, $pattern);
     }
 
@@ -221,6 +227,6 @@ EOD;
 
     public function getMap()
     {
-        $this->builder->getMap();
+        return $this->builder->getMap();
     }
 }

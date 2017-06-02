@@ -12,6 +12,30 @@ use Pivchenberg\ExceptionsGenerator\Generator\ExceptionGenItemType\ExceptionGenI
 
 class ExceptionGenItemBuilder
 {
+    const CLASS_PRIORITY = [
+        'Exception',
+        'ErrorException',
+        'LogicException',
+        'BadFunctionCallException',
+        'BadMethodCallException',
+        'DomainException',
+        'InvalidArgumentException',
+        'LengthException',
+        'OutOfRangeException',
+        'RuntimeException',
+        'OutOfBoundsException',
+        'OverflowException',
+        'RangeException',
+        'UnderflowException',
+        'UnexpectedValueException',
+        'Error',
+        'ArithmeticError',
+        'AssertionError',
+        'ParseError',
+        'DivisionByZeroError',
+        'TypeError',
+    ];
+
     /**
      * @var string
      */
@@ -85,6 +109,40 @@ class ExceptionGenItemBuilder
                 ];
             }
         }
+
+        $this->excludeFromMap();
+        $this->sortMapByPriority();
+    }
+
+    /**
+     * Actually from this exceptions we can't extends
+     */
+    protected function excludeFromMap()
+    {
+        $exclude = [
+            'ArgumentCountError',
+            'ClosedGeneratorException',
+            'IntlException',
+        ];
+
+        foreach ($exclude as $excludeItem) {
+            if (isset($this->map[$excludeItem]))
+                unset($this->map[$excludeItem]);
+        }
+    }
+
+    protected function sortMapByPriority()
+    {
+        $map = $this->map;
+        $sortedMap = [];
+
+        foreach (self::CLASS_PRIORITY as $className) {
+            if (isset($map[$className])) {
+                $sortedMap[$className] = $map[$className];
+                unset($map[$className]);
+            }
+        }
+        $this->map = array_merge($sortedMap, $map);
     }
 
     /**
