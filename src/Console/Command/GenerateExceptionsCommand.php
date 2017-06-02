@@ -29,6 +29,13 @@ class GenerateExceptionsCommand extends Command
     {
         $questionHelper = $this->getHelper('question');
 
+        $guessedDocumentRoot = ExceptionGenerator::getDocumentRoot();
+        $documentRootQuestion = new Question(
+            "Please enter full project root [{$guessedDocumentRoot}]: ",
+            $guessedDocumentRoot
+        );
+        $documentRoot = $questionHelper->ask($input, $output, $documentRootQuestion);
+
         $namespaceQuestion = new Question(
             'Please enter the namespace of exceptions [AppBundle\\Exception]: ',
             'AppBundle\\Exception'
@@ -48,7 +55,7 @@ class GenerateExceptionsCommand extends Command
         );
         $basicInterfaceName = $questionHelper->ask($input, $output, $basicInterfaceNameQuestion);
 
-        $generator = new ExceptionGenerator($namespace, $destinationPath, $basicInterfaceName);
+        $generator = new ExceptionGenerator($namespace, $documentRoot, $destinationPath, $basicInterfaceName);
 
         if (!$generator->isBasicInterfaceExists()) {
             $generator->generateBasicInterface();

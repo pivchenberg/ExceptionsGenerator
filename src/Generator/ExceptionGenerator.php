@@ -41,11 +41,6 @@ EOD;
     private $destinationPath;
 
     /**
-     * @var string
-     */
-    private $documentRoot;
-
-    /**
      * @var bool
      */
     private $isBasicInterfaceExists = false;
@@ -53,19 +48,22 @@ EOD;
     /**
      * ExceptionGenerator constructor.
      * @param $namespace
+     * @param $documentRoot
      * @param $destinationPathFromRoot
      * @param null $basicInterFaceName
      */
-    public function __construct($namespace, $destinationPathFromRoot, $basicInterFaceName = null)
+    public function __construct($namespace, $documentRoot, $destinationPathFromRoot, $basicInterFaceName = null)
     {
         // TODO: maybe remember $namespace and $destinationPathFromRoot?
+        // TODO: create method normalizeNamespace
         $arNamespace = self::pathToArray($namespace);
         $namespace = self::arrayToNamespace($arNamespace);
 
         $this->builder = new ExceptionGenItemBuilder($namespace, $basicInterFaceName);
         $this->fs = new Filesystem();
-        $this->documentRoot = self::getDocumentRoot(__DIR__);
+        $this->documentRoot = $documentRoot;
 
+        // TODO: create method normalizeDocumentRoot
         $explodedDocumentRoot = self::pathToArray($this->documentRoot);
         $explodedDestinationPath = self::pathToArray($destinationPathFromRoot);
         $destinationPath = self::arrayToPath(array_merge($explodedDocumentRoot, $explodedDestinationPath));
@@ -171,17 +169,20 @@ EOD;
     }
 
     /**
-     * @param $path
      * @param int $depth
      * @return string
      */
-    static public function getDocumentRoot($path, $depth = 10)
+    static public function getDocumentRoot($depth = 10)
     {
-        $path = preg_replace('/^phar:\/\//', '',$path);
-        $guessedDocumentRoot = self::guessDocumentRoot($path, $depth);
+        $guessedDocumentRoot = \Phar::running(false);
+
+        if(empty($guessedDocumentRoot)) {
+            $guessedDocumentRoot = self::guessDocumentRoot(__DIR__, $depth);
+        }
+
         if (empty($guessedDocumentRoot)) {
-            $exploded = self::pathToArray($path);
-            $guessedDocumentRoot = self::arrayToPath(array_splice($exploded, 3));
+            $exploded = self::pathToArray(__DIR__);
+            $guessedDocumentRoot = self::arrayToPath(array_splice($exploded, 5));
         }
 
         return $guessedDocumentRoot;
