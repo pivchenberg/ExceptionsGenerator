@@ -7,6 +7,7 @@
 
 namespace Pivchenberg\ExceptionsGenerator\Generator;
 
+use Pivchenberg\ExceptionsGenerator\Exception\ErrorException;
 use Pivchenberg\ExceptionsGenerator\Exception\LogicException;
 use Pivchenberg\ExceptionsGenerator\Exception\RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
@@ -77,8 +78,9 @@ EOD;
 
     /**
      * @param $exceptionClassName
-     * @return string
-     * @throws \Exception
+     * @return array
+     * @throws RuntimeException
+     * @throws ErrorException
      */
     public function generateExceptionClass($exceptionClassName)
     {
@@ -88,13 +90,16 @@ EOD;
 
         // check basic interface
         if (!$this->isBasicInterfaceExists()) {
-            $this->generateBasicInterface();
+            throw new ErrorException('Before generating exception class you must create basicInterface');
         }
 
         $exceptionGenItem = $this->builder->build($exceptionClassName);
         return $this->generate($exceptionGenItem);
     }
 
+    /**
+     * @return bool
+     */
     protected function isBasicInterfaceExists()
     {
         if(!$this->isBasicInterfaceExists) {
@@ -110,12 +115,12 @@ EOD;
     protected function generateBasicInterface()
     {
         $basicInterface = $this->builder->buildBasicInterface();
-        $this->generate($basicInterface);
+        return $this->generate($basicInterface);
     }
 
     /**
      * @param ExceptionGenItem $exceptionGenItem
-     * @return string
+     * @return array
      */
     protected function generate(ExceptionGenItem $exceptionGenItem)
     {
@@ -155,16 +160,20 @@ EOD;
         $filePath = $this->destinationPath
             . DIRECTORY_SEPARATOR . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
 
-        if(!file_exists($filePath)) {
+        $fileAlreadyExists = file_exists($filePath);
+        if(!$fileAlreadyExists) {
             $this->fs->dumpFile($filePath, $pattern);
         } else {
-            $newFile = $this->destinationPath
+            $newFilePath = $this->destinationPath
                 . DIRECTORY_SEPARATOR . '~' . $exceptionGenItem->getClassName() . self::PHP_EXTENSION;
-            $this->fs->copy($filePath, $newFile);
+            $this->fs->copy($filePath, $newFilePath);
             $this->fs->dumpFile($filePath, $pattern);
         }
 
-        return $filePath;
+        return [
+            'filePath' => $filePath,
+            'fileAlreadyExists' => $fileAlreadyExists,
+        ];
     }
 
     /**
