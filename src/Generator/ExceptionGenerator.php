@@ -62,11 +62,7 @@ EOD;
         $arNamespace = self::pathToArray($namespace);
         $namespace = self::arrayToNamespace($arNamespace);
 
-        if (!empty($basicInterFaceName))
-            $this->builder = new ExceptionGenItemBuilder($namespace, $basicInterFaceName);
-        else
-            $this->builder = new ExceptionGenItemBuilder($namespace);
-
+        $this->builder = new ExceptionGenItemBuilder($namespace, $basicInterFaceName);
         $this->fs = new Filesystem();
         $this->documentRoot = self::getDocumentRoot(__DIR__);
 
@@ -84,10 +80,6 @@ EOD;
      */
     public function generateExceptionClass($exceptionClassName)
     {
-        //check target dir
-        if (!$this->fs->exists($this->destinationPath))
-            throw new RuntimeException("target `{$this->destinationPath}` directory does not exists");
-
         // check basic interface
         if (!$this->isBasicInterfaceExists()) {
             throw new ErrorException('Before generating exception class you must create basicInterface');

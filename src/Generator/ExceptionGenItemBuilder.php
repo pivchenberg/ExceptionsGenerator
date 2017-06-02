@@ -37,6 +37,8 @@ class ExceptionGenItemBuilder
         'TypeError',
     ];
 
+    const BASIC_INTERFACE_DEFAULT_NAME = 'ExceptionInterface';
+
     /**
      * @var string
      */
@@ -57,10 +59,13 @@ class ExceptionGenItemBuilder
      * @param $namespace
      * @param $basicInterfaceName
      */
-    public function __construct($namespace, $basicInterfaceName = 'ExceptionInterface')
+    public function __construct($namespace, $basicInterfaceName = null)
     {
         $this->namespace = $namespace;
-        $this->basicInterfaceName = $basicInterfaceName;
+        if (!$basicInterfaceName)
+            $this->basicInterfaceName = self::BASIC_INTERFACE_DEFAULT_NAME;
+        else
+            $this->basicInterfaceName = $basicInterfaceName;
         $this->buildMap();
     }
 
