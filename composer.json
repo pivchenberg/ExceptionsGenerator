@@ -18,5 +18,6 @@
 	"psr-4": {
 	  "Pivchenberg\\ExceptionsGenerator\\": "src/"
 	}
-  }
+  },
+  "bin": ["bin/console"]
 }

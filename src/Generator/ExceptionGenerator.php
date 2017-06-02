@@ -177,6 +177,7 @@ EOD;
      */
     static public function getDocumentRoot($path, $depth = 10)
     {
+        $path = preg_replace('/^phar:\/\//', '',$path);
         $guessedDocumentRoot = self::guessDocumentRoot($path, $depth);
         if (empty($guessedDocumentRoot)) {
             $exploded = self::pathToArray($path);
