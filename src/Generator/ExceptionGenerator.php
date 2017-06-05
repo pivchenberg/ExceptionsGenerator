@@ -54,18 +54,21 @@ EOD;
      */
     public function __construct($namespace, $documentRoot, $destinationPathFromRoot, $basicInterFaceName = null)
     {
-        // TODO: maybe remember $namespace and $destinationPathFromRoot?
         self::normalizeNamespace($namespace);
 
         $this->builder = new ExceptionGenItemBuilder($namespace, $basicInterFaceName);
         $this->fs = new Filesystem();
+        $firstSlash = false;
+        if (preg_match('/^\//', $documentRoot)) {
+            $firstSlash = true;
+        }
         self::normalizePath($documentRoot);
-        $this->documentRoot =  DIRECTORY_SEPARATOR . $documentRoot;
+        $this->documentRoot = $firstSlash ? DIRECTORY_SEPARATOR . $documentRoot : $documentRoot;
 
         $explodedDocumentRoot = self::pathToArray($this->documentRoot);
         $explodedDestinationPath = self::pathToArray($destinationPathFromRoot);
         $destinationPath = self::arrayToPath(array_merge($explodedDocumentRoot, $explodedDestinationPath));
-        $this->destinationPath = DIRECTORY_SEPARATOR . $destinationPath;
+        $this->destinationPath = $firstSlash ? DIRECTORY_SEPARATOR . $destinationPath : $destinationPath;
     }
 
     /**
@@ -176,6 +179,10 @@ EOD;
 
         if(empty($guessedDocumentRoot)) {
             $guessedDocumentRoot = self::guessDocumentRoot(__DIR__, $depth);
+        } else {
+            $arPath = preg_split('/[\/\\\\]+/', $guessedDocumentRoot);
+            array_pop($arPath);
+            $guessedDocumentRoot = implode(DIRECTORY_SEPARATOR, $arPath);
         }
 
         if (empty($guessedDocumentRoot)) {
@@ -218,14 +225,12 @@ EOD;
     }
 
     /**
-     * TODO: this method removes first / from path, works for Windows but not for Linux
-     *
      * @param $path
      * @return array|ø
      */
     static protected function pathToArray($path)
     {
-        $explodedPath = preg_split('/[\/\\\\]+/', $path, -1, PREG_SPLIT_NO_EMPTY);
+        return preg_split('/[\/\\\\]+/', $path, -1, PREG_SPLIT_NO_EMPTY);
     }
 
     /**
