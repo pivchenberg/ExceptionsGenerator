@@ -6,3 +6,7 @@ Generate php exception classes via console command
 ``` bash 
 php exceptions-generator.phar e:g
 ```
+### Screenshots
+![Console output](eg-example-1.jpg)
+![Generated classes](eg-example-2.jpg)
+![Exception code](eg-example-3.jpg)
